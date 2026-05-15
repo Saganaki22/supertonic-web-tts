@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supersonic TTS</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔊</text></svg>">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon">&#9775;</span>
+        <div>
+          <h1>Supersonic <span class="accent">TTS</span></h1>
+          <p class="tagline">On-device text-to-speech &middot; 31 languages</p>
+        </div>
+      </div>
+      <div id="statusBadge" class="status-badge loading">
+        <span class="status-dot"></span>
+        <span id="statusBadgeText">Loading models...</span>
+      </div>
+    </header>
+
+    <main class="main-grid">
+      <!-- Left: Input Panel -->
+      <section class="panel input-panel">
+        <!-- Voice Selection -->
+        <div class="field">
+          <label>Voice</label>
+          <div class="voice-grid" id="voiceGrid"></div>
+        </div>
+
+        <!-- Language -->
+        <div class="field">
+          <label for="langSelect">Language</label>
+          <select id="langSelect">
+            <option value="en" selected>English</option>
+            <option value="ko">한국어</option>
+            <option value="ja">日本語</option>
+            <option value="ar">العربية</option>
+            <option value="de">Deutsch</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+            <option value="it">Italiano</option>
+            <option value="pt">Português</option>
+            <option value="ru">Русский</option>
+            <option value="zh">中文</option>
+            <option value="hi">हिन्दी</option>
+            <option value="nl">Dutch</option>
+            <option value="pl">Polski</option>
+            <option value="tr">Türkçe</option>
+            <option value="sv">Svenska</option>
+            <option value="da">Dansk</option>
+            <option value="fi">Suomi</option>
+            <option value="el">Ελληνικά</option>
+            <option value="cs">Čeština</option>
+            <option value="bg">Български</option>
+            <option value="hr">Hrvatski</option>
+            <option value="hu">Magyar</option>
+            <option value="ro">Română</option>
+            <option value="sk">Slovenčina</option>
+            <option value="sl">Slovenščina</option>
+            <option value="et">Eesti</option>
+            <option value="lv">Latviešu</option>
+            <option value="lt">Lietuvių</option>
+            <option value="id">Bahasa Indonesia</option>
+            <option value="uk">Українська</option>
+            <option value="vi">Tiếng Việt</option>
+          </select>
+        </div>
+
+        <!-- Text Input -->
+        <div class="field flex-1">
+          <div class="label-row">
+            <label for="textInput">Text</label>
+            <button class="icon-btn" id="pasteBtn" title="Paste from clipboard">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+              </svg>
+            </button>
+          </div>
+          <textarea id="textInput" rows="6" placeholder="Type or paste text here...">This morning, I took a walk in the park, and the sound of the birds and the breeze was so pleasant that I stopped for a long time just to listen.</textarea>
+        </div>
+
+        <!-- Params -->
+        <div class="params-row">
+          <div class="field">
+            <label for="stepsInput">Steps</label>
+            <input type="number" id="stepsInput" value="8" min="1" max="50">
+          </div>
+          <div class="field">
+            <label for="speedInput">Speed</label>
+            <input type="number" id="speedInput" value="1.05" min="0.5" max="2.0" step="0.05">
+          </div>
+        </div>
+
+        <!-- Generate -->
+        <button class="btn-generate" id="generateBtn" disabled>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Generate Speech
+        </button>
+      </section>
+
+      <!-- Right: Output Panel -->
+      <section class="panel output-panel">
+        <!-- Progress -->
+        <div class="progress-section hidden" id="progressSection">
+          <div class="progress-header">
+            <span id="progressLabel">Generating...</span>
+            <span id="progressPct">0%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div class="result-area" id="resultArea">
+          <div class="placeholder" id="placeholder">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+            <p>Generated audio will appear here</p>
+          </div>
+
+          <div class="result-card hidden" id="resultCard">
+            <div class="result-header">
+              <span class="result-title">Generated Audio</span>
+              <div class="result-meta">
+                <span id="audioDuration">--</span>
+                <span id="genTime">--</span>
+              </div>
+            </div>
+            <div class="waveform-bg">
+              <audio id="audioPlayer" controls></audio>
+            </div>
+            <div class="result-actions">
+              <button class="btn-download" id="downloadBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Download WAV
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div class="error-box hidden" id="errorBox"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-links">
+        Powered by <a href="https://github.com/supertone-inc/supertonic" target="_blank" rel="noopener">Supertonic 3</a> &middot; All processing happens in your browser
+      </div>
+      <div class="footer-bottom">
+        <a href="https://github.com/Saganaki22/supertonic-web-tts" target="_blank" rel="noopener" class="github-link">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+        <button class="cache-toggle-btn" id="cacheToggle">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+          Cache <span id="cacheCount">0</span>
+        </button>
+      </div>
+      <div class="cache-panel" id="cachePanel">
+        <div class="cache-header">
+          <span>Cached Files — <span id="cacheTotal">0 B</span></span>
+          <button class="cache-clear-btn" id="clearAllCache">Clear All</button>
+        </div>
+        <div class="cache-list" id="cacheList"></div>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module" src="/main.js"></script>
+</body>
+</html>
