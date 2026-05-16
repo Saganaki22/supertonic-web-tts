@@ -208,7 +208,7 @@ function playSample(voiceId) {
     sampleAudio = null;
   }
 
-  const audio = new Audio(`/${voiceId}.wav`);
+  const audio = new Audio(`${import.meta.env.BASE_URL}${voiceId}.wav`);
   sampleAudio = audio;
   playingVoiceId = voiceId;
   updatePlayButtons();
